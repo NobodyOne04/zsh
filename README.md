@@ -17,7 +17,7 @@ make chsh        # Arch: make zsh your login shell
 ```
 
 Open a new terminal. The first start downloads zinit and the plugins; after that it is instant.
-A Nerd Font is needed for icons (Ghostty includes the symbols).
+A Nerd Font is needed for icons (`ttf-jetbrains-mono-nerd`; the hyprland repo installs it).
 
 `make link` moves your current `~/.zshrc` to `~/.zshrc.bak-<date>` and copies any `export …KEY/TOKEN/SECRET/PASSWORD=`
 lines from it into `~/.config/zsh/secrets.zsh` (names are printed, values never). `make unlink` restores the
