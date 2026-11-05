@@ -1,0 +1,4 @@
+# Copy to ~/.config/zsh/local.zsh for settings that only apply to this machine.
+# export AWS_PROFILE=dev
+# path=(~/work/tools/bin $path)
+# alias work='cd ~/work'

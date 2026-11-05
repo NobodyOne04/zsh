@@ -1,0 +1,4 @@
+# never commit these: machine-specific settings and credentials
+local.zsh
+secrets.zsh
+.DS_Store
