@@ -9,6 +9,7 @@ setopt SHARE_HISTORY           # all terminals share history
 setopt HIST_IGNORE_ALL_DUPS HIST_REDUCE_BLANKS HIST_VERIFY
 setopt HIST_IGNORE_SPACE       # a leading space keeps a command (and any secret in it) out of history
 setopt HIST_EXPIRE_DUPS_FIRST
+setopt HIST_FCNTL_LOCK         # proper file locking: several terminals can't corrupt the file
 
 # navigation & globbing
 setopt AUTO_CD AUTO_PUSHD PUSHD_IGNORE_DUPS PUSHD_SILENT

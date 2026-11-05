@@ -46,6 +46,16 @@ venv() {
   source .venv/bin/activate
 }
 
+# fix-history: repair "zsh: corrupt history file" (e.g. after a hard power-off)
+fix-history() {
+  local f=${HISTFILE:-$HOME/.zsh_history} bak=${HISTFILE:-$HOME/.zsh_history}.corrupt-$(date +%Y%m%d-%H%M%S)
+  [[ -f $f ]] || { print -u2 "no history file at $f"; return 1 }
+  # drop NUL bytes and control characters (what a hard power-off leaves behind),
+  # keep tabs, newlines and UTF-8 text
+  mv "$f" "$bak" && LC_ALL=C tr -d '\000-\010\013\014\016-\037' < "$bak" > "$f" && chmod 600 "$f" && fc -R "$f" &&
+    print -P "%F{cyan}›%f history repaired ($(( $(wc -l < "$f") )) lines kept); damaged copy: ${bak/#$HOME/~}"
+}
+
 # zbench: measure shell startup (10 runs)
 zbench() {
   zmodload zsh/datetime

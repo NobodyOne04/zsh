@@ -82,9 +82,10 @@ you always see which cluster you are about to touch. Old prompts collapse to a s
 | `venv` | create (with uv if present) and activate `./.venv` |
 | `secret-add NAME` | store a credential in the secrets file (hidden input, never in history) |
 | `zbench` | measure startup |
+| `fix-history` | repair "zsh: corrupt history file" (keeps everything readable, saves the damaged copy) |
 
 **Git** (on top of oh-my-zsh's git aliases: `gst`, `gco`, `gp`, `gl`, `gcmsg`, …):
-`gbf` fuzzy branch switch, `glf` browse the log with diffs, `gclean` delete merged branches, `gwip` / `gunwip`
+`gbf` fuzzy branch switch, `glf` browse the log with diffs, `gbclean` delete merged branches, `gwip` / `gunwip`
 park work, `groot` cd to the repo root.
 
 **Docker:** `d`, `dc` (compose), `dcu` `dcd` `dcl`, `dps` (tidy table), `dex` (fuzzy-pick a container and get a
