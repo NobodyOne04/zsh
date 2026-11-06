@@ -42,15 +42,21 @@ lib/git.zsh              git helpers (loaded after oh-my-zsh's git aliases)
 
 ## Prompt
 
+The same look as on the Mac: Powerlevel10k "classic", two lines, slanted segments, a frame on the right.
+
 ```text
-~/projects/zsh main ✱                              ✘ 1  4s  venv  14:02
-❯
+  ~/projects/zsh  on  main !1 ─────────────────────── took 4s  at 14:02:07  ─╮
+❯                                                                                  ─╯
 ```
 
-Directory and git on the left; on the right only what matters: last exit code if it failed, duration if over
-3 s, background jobs, direnv, Python venv, time. The **kubernetes context**, **AWS profile** and **terraform
-workspace** appear only while you type a command that uses them (`k`, `kubectl`, `helm`, `aws`, `tf`…), so
-you always see which cluster you are about to touch. Old prompts collapse to a single `❯` line.
+- **Left:** the OS logo (the Arch logo in cyan on Arch, the Apple logo on macOS), the directory, and git:
+  branch, `⇣⇡` behind/ahead, `+` staged, `!` unstaged, `?` untracked, `*` stashes, `~` conflicts.
+- **Right:** duration of commands over 3 s, background jobs, direnv, Python venv, time. A red `❯` means the
+  last command failed.
+- The **kubernetes context**, **AWS profile** and **terraform workspace** appear only while you type a command
+  that uses them (`k`, `kubectl`, `helm`, `aws`, `tf`…), so you always see which cluster you are about to touch.
+- Old prompts collapse to a single `❯` line. `p10k configure` builds another style (it writes `~/.p10k.zsh`;
+  copy that over `p10k.zsh` here to keep it).
 
 ## Keys
 
