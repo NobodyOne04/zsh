@@ -25,6 +25,7 @@ _cached_completion() {
 
 _cached_source zoxide  zoxide init zsh                 # z <dir>, zi (interactive)
 _cached_source fzf     fzf --zsh                       # Ctrl-T files, Ctrl-R history, Alt-C cd
+_cached_source atuin   atuin init zsh --disable-up-arrow  # Ctrl-R: atuin history search (after fzf, so it wins)
 _cached_source direnv  direnv hook zsh                 # per-project .envrc
 _cached_source mise    mise activate zsh               # runtime versions (if you use mise)
 

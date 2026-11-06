@@ -74,3 +74,32 @@ secret-add() {
   export "$name=$value"
   print -P "%F{cyan}›%f $name saved to ${file/#$HOME/~} (mode 600)"
 }
+
+# ---------- per-project environment (direnv + sops) ----------
+# envinit: give this folder a one-line .envrc (`layout project`, defined in
+# direnv/direnvrc): loads .env / .env.sops and activates .venv or venv
+envinit() {
+  if [[ -f .envrc ]]; then print -u2 ".envrc exists:"; cat .envrc; return 1; fi
+  print -r -- 'layout project' > .envrc && direnv allow . && print -P "%F{cyan}›%f .envrc created and allowed"
+}
+
+# env-encrypt [file]: encrypt .env into .env.sops with your age key (make -C <zsh repo> age-key).
+# .env.sops can be committed; delete the plain .env afterwards if you like.
+env-encrypt() {
+  local src=${1:-.env} key=${SOPS_AGE_KEY_FILE:-$XDG_CONFIG_HOME/sops/age/keys.txt}
+  [[ -f $src ]] || { print -u2 "no $src here"; return 1 }
+  [[ -f $key ]] || { print -u2 "no age key at $key: run 'make -C $ZSH_CONFIG_DIR age-key' first"; return 1 }
+  sops encrypt --age "$(age-keygen -y "$key")" --input-type dotenv --output-type dotenv "$src" >| .env.sops &&
+    print -P "%F{cyan}›%f $src -> .env.sops (commit .env.sops; $src stays git-ignored)"
+}
+
+# env-edit: edit .env.sops decrypted in $EDITOR; it is re-encrypted on save
+env-edit() {
+  [[ -f .env.sops ]] || { print -u2 "no .env.sops here (env-encrypt creates it)"; return 1 }
+  sops edit --input-type dotenv --output-type dotenv .env.sops
+}
+
+# leaks: scan this repo's history and working tree for secrets (values redacted)
+leaks() {
+  gitleaks git --redact --no-banner -v . && gitleaks dir --redact --no-banner . && print -P "%F{cyan}›%f no leaks found"
+}

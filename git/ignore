@@ -1,0 +1,11 @@
+# Ignored in every repo. Linked to ~/.config/git/ignore by `make link`.
+
+# local environment (direnv / dotenv); the encrypted .env.sops IS committed
+.env
+.env.local
+.envrc
+
+# OS / editor junk
+.DS_Store
+*.swp
+.ipynb_checkpoints/

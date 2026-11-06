@@ -1,0 +1,5 @@
+# lazygit (Mac + Arch). Linked to ~/.config/lazygit/config.yml by `make link`.
+git:
+  paging:
+    colorArg: always
+    pager: delta --paging=never --line-numbers

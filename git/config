@@ -1,0 +1,51 @@
+# Shared git settings for every machine (Mac + Arch).
+# Linked to ~/.config/git/config by `make link`.
+#
+# Machine-specific settings stay in ~/.gitconfig, which git reads after this
+# file (so it wins): user.name, user.email, and commit signing
+# (user.signingkey + commit.gpgSign), because the SSH key differs per machine.
+
+[core]
+	editor = nvim
+	pager = delta
+	# global hooks: gitleaks on every commit, then the repo's own .git/hooks
+	hooksPath = ~/.config/git/hooks
+
+# ---------- diffs: delta ----------
+[interactive]
+	diffFilter = delta --color-only
+[delta]
+	navigate = true          # n / N jump between files
+	line-numbers = true
+[diff]
+	algorithm = histogram    # clearer diffs for moved/changed blocks
+	colorMoved = default
+[merge]
+	conflictStyle = zdiff3   # conflicts also show the original text
+
+# ---------- everyday behaviour ----------
+[init]
+	defaultBranch = main
+[pull]
+	rebase = true            # no "Merge branch 'main' of ..." commits
+[rebase]
+	autoStash = true         # pull/rebase with uncommitted changes just works
+	autoSquash = true
+[push]
+	autoSetupRemote = true   # first `git push` of a new branch needs no -u
+[fetch]
+	prune = true             # forget remote branches that were deleted
+[rerere]
+	enabled = true           # remember how a conflict was resolved
+[commit]
+	verbose = true           # show the diff while writing the message
+[branch]
+	sort = -committerdate    # `git branch`: most recent first
+[help]
+	autocorrect = prompt
+
+# ---------- signing (key is set per machine in ~/.gitconfig) ----------
+[gpg]
+	format = ssh
+[gpg "ssh"]
+	allowedSignersFile = ~/.config/git/allowed_signers

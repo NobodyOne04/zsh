@@ -1,0 +1,38 @@
+# Personal direnv library (Mac + Arch). Linked to ~/.config/direnv/direnvrc
+# by `make link`. Functions here can be used in any project's .envrc.
+#
+# A typical .envrc is one line (`envinit` writes it for you):
+#   layout project
+
+# layout project: everything a project usually needs
+#   .env       plain variables (git-ignored everywhere)
+#   .env.sops  encrypted variables (safe to commit; see `env-encrypt`)
+#   .venv/ or venv/  Python virtualenv, activated
+layout_project() {
+  dotenv_if_exists .env
+  [[ -f .env.sops ]] && dotenv_sops .env.sops
+  local v
+  for v in .venv venv; do
+    if [[ -x $v/bin/python ]]; then
+      export VIRTUAL_ENV=$PWD/$v
+      PATH_add "$v/bin"
+      break
+    fi
+  done
+}
+
+# dotenv_sops [file]: load a sops-encrypted dotenv file (decrypted in memory only)
+dotenv_sops() {
+  local file=${1:-.env.sops}
+  watch_file "$file"
+  if ! has sops; then
+    log_error "sops is not installed: $file not loaded"
+    return 1
+  fi
+  local vars
+  vars=$(sops decrypt --input-type dotenv --output-type dotenv "$file") || {
+    log_error "could not decrypt $file (is your age key in \$SOPS_AGE_KEY_FILE?)"
+    return 1
+  }
+  eval "$(direnv dotenv bash /dev/stdin <<<"$vars")"
+}

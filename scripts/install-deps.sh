@@ -2,8 +2,8 @@
 # Shell essentials (+ optional devops tools with --devops).
 set -euo pipefail
 
-core_arch=(zsh git fzf zoxide eza fd ripgrep bat direnv lazygit btop tldr git-delta jq less)
-core_brew=(zsh git fzf zoxide eza fd ripgrep bat direnv lazygit btop tldr git-delta jq)
+core_arch=(zsh git fzf zoxide eza fd ripgrep bat direnv lazygit btop tldr git-delta jq less atuin gitleaks sops age)
+core_brew=(zsh git fzf zoxide eza fd ripgrep bat direnv lazygit btop tldr git-delta jq atuin gitleaks sops age)
 devops_arch=(kubectl helm k9s terraform aws-cli-v2 docker docker-compose docker-buildx yq)
 devops_brew=(kubectl helm k9s terraform awscli yq)
 

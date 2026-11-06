@@ -1,0 +1,21 @@
+# atuin: searchable shell history, optionally synced (end-to-end encrypted)
+# between machines. Linked to ~/.config/atuin/config.toml by `make link`.
+#
+#   Ctrl-R   search history (Up arrow stays the normal substring search)
+#   sync:    `atuin register` on the first machine, `atuin login` on the others
+#            (keep the key from `atuin key` in your password manager)
+
+style = "compact"
+inline_height = 20
+enter_accept = false          # Enter puts the command on the prompt; run it yourself
+filter_mode = "global"        # all history; Ctrl-R again cycles: host / session / directory
+search_mode = "fuzzy"
+show_preview = true
+
+# never record commands that look like they carry a secret
+secrets_filter = true
+history_filter = ["^export .*(KEY|TOKEN|SECRET|PASSWORD)", "^secret-add"]
+
+auto_sync = true
+sync_frequency = "10m"
+update_check = false

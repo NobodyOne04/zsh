@@ -1,0 +1,30 @@
+#!/bin/sh
+# Global git hooks (core.hooksPath = ~/.config/git/hooks).
+# Every hook name in this folder is a link to this script. It runs our checks,
+# then the repo's own .git/hooks/<name>, so per-repo hooks keep working.
+#
+#   pre-commit: gitleaks scans the staged changes for secrets.
+#     false positive?  add `gitleaks:allow` in a comment on that line
+#     skip once:       SKIP_GITLEAKS=1 git commit ...
+hook=$(basename "$0")
+
+if [ "$hook" = pre-commit ] && [ -z "${SKIP_GITLEAKS:-}" ]; then
+  if command -v gitleaks >/dev/null 2>&1; then
+    if ! gitleaks git --pre-commit --staged --redact --no-banner --log-level warn; then
+      echo >&2
+      echo "gitleaks: a secret seems to be staged (above). Commit stopped." >&2
+      echo "  real secret: unstage it (move it to .env / secret-add)" >&2
+      echo "  false positive: add 'gitleaks:allow' in a comment on that line, or SKIP_GITLEAKS=1 git commit ..." >&2
+      exit 1
+    fi
+  else
+    echo "warning: gitleaks not installed, commit not scanned for secrets" >&2
+  fi
+fi
+
+# hand over to the repo's own hook, if it has one
+local_hook="$(git rev-parse --git-common-dir 2>/dev/null)/hooks/$hook"
+if [ -x "$local_hook" ]; then
+  exec "$local_hook" "$@"
+fi
+exit 0

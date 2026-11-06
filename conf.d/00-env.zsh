@@ -8,6 +8,8 @@ typeset -g ZSH_CACHE_DIR=$XDG_CACHE_HOME/zsh
 [[ -d $ZSH_CACHE_DIR ]] || mkdir -p "$ZSH_CACHE_DIR/completions"
 
 export EDITOR=nvim VISUAL=nvim
+# sops reads the age key from the same place on macOS and Linux
+export SOPS_AGE_KEY_FILE=$XDG_CONFIG_HOME/sops/age/keys.txt
 export PAGER=less LESS='-R -F -i -M'
 export LANG=${LANG:-en_US.UTF-8}
 

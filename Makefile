@@ -7,8 +7,9 @@ ZSHRC   := $(HOME)/.zshrc
 STAMP   := $(shell date +%Y%m%d-%H%M%S)
 CACHE   := $(or $(XDG_CACHE_HOME),$(HOME)/.cache)/zsh
 SECRETS := $(or $(XDG_CONFIG_HOME),$(HOME)/.config)/zsh/secrets.zsh
+AGE_KEY := $(or $(XDG_CONFIG_HOME),$(HOME)/.config)/sops/age/keys.txt
 
-.PHONY: help install deps devops link unlink secrets chsh update check bench clean
+.PHONY: help install deps devops link unlink status age-key secrets chsh update check bench clean
 
 help: ## Show this help
 	@awk 'BEGIN {FS = ":.*##"} /^[a-zA-Z_-]+:.*##/ {printf "  \033[36m%-8s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -21,22 +22,20 @@ deps: ## Install shell tools (fzf, zoxide, eza, fd, rg, bat, direnv, lazygit, de
 devops: ## Install devops tools too (kubectl, helm, k9s, terraform, aws, docker, yq)
 	@./scripts/install-deps.sh --devops
 
-link: ## Link ~/.zshrc to this repo; old file backed up, its secrets moved out
-	@if [ -L "$(ZSHRC)" ] && [ "$$(readlink "$(ZSHRC)")" = "$(CURDIR)/zshrc" ]; then \
-		echo "already linked: $(ZSHRC)"; \
-	else \
-		if [ -e "$(ZSHRC)" ] || [ -L "$(ZSHRC)" ]; then \
-			mv "$(ZSHRC)" "$(ZSHRC).bak-$(STAMP)"; echo "backed up: $(ZSHRC) -> $(ZSHRC).bak-$(STAMP)"; \
-			./scripts/migrate-secrets.sh "$(ZSHRC).bak-$(STAMP)"; \
-		fi; \
-		ln -s "$(CURDIR)/zshrc" "$(ZSHRC)"; echo "linked: $(ZSHRC) -> $(CURDIR)/zshrc"; \
-	fi
+link: ## Link ~/.zshrc, git, direnv, atuin, lazygit configs (old files backed up)
+	@./scripts/link.sh link
 
-unlink: ## Restore the most recent ~/.zshrc backup
-	@if [ -L "$(ZSHRC)" ] && [ "$$(readlink "$(ZSHRC)")" = "$(CURDIR)/zshrc" ]; then \
-		rm "$(ZSHRC)"; last=$$(ls -d $(ZSHRC).bak-* 2>/dev/null | sort | tail -1); \
-		if [ -n "$$last" ]; then mv "$$last" "$(ZSHRC)"; echo "restored $$last"; else echo "removed link (no backup found)"; fi; \
-	else echo "$(ZSHRC) is not linked to this repo"; fi
+unlink: ## Remove the links and restore the newest backups
+	@./scripts/link.sh unlink
+
+status: ## Show which configs are linked
+	@./scripts/link.sh status
+
+age-key: ## Create your age key for sops-encrypted .env files (once per person; back it up!)
+	@f="$(AGE_KEY)"; if [ -f "$$f" ]; then echo "exists: $$f"; else \
+		mkdir -p "$$(dirname "$$f")"; age-keygen -o "$$f" 2>/dev/null; chmod 600 "$$f"; echo "created: $$f"; fi; \
+	echo "public key: $$(age-keygen -y "$$f")"; \
+	echo "BACK UP $$f (password manager): without it encrypted .env files cannot be read. Copy it to your other machines."
 
 secrets: ## Move credentials from FILE=<old zshrc> into $(SECRETS)
 	@./scripts/migrate-secrets.sh "$(or $(FILE),$(error usage: make secrets FILE=path))"
@@ -50,6 +49,7 @@ update: ## Update zinit and all plugins, then rebuild caches
 
 check: ## Syntax-check every file and make sure startup prints nothing
 	@for f in zshrc p10k.zsh conf.d/*.zsh lib/*.zsh; do zsh -n "$$f" || exit 1; done; echo "ok: syntax"
+	@bash -n scripts/link.sh && bash -n direnv/direnvrc && sh -n git/hooks/_dispatch && git config -f git/config --list >/dev/null && echo "ok: git, direnv, hooks"
 	@log=$$(mktemp); \
 	if [ "$$(uname)" = Darwin ]; then script -q "$$log" zsh -i -c 'print -r -- CHECK_DONE' >/dev/null 2>&1; \
 	else script -qec "zsh -i -c 'print -r -- CHECK_DONE'" "$$log" >/dev/null 2>&1; fi; \
