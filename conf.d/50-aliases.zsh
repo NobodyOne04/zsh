@@ -26,3 +26,12 @@ alias mkdir='mkdir -p'
 alias df='df -h' du='du -h'
 alias please='sudo $(fc -ln -1)'          # rerun the last command with sudo
 alias h='history 1 | tail -n 30'
+
+# clipboard: cbc copies stdin, cbp pastes (`git diff | cbc`, `cbp > file`)
+if [[ $OSTYPE == darwin* ]]; then
+  alias cbc='pbcopy' cbp='pbpaste'
+elif [[ -n $WAYLAND_DISPLAY ]] && (( $+commands[wl-copy] )); then
+  alias cbc='wl-copy' cbp='wl-paste'
+elif (( $+commands[xclip] )); then
+  alias cbc='xclip -selection clipboard' cbp='xclip -selection clipboard -o'
+fi
