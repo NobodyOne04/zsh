@@ -90,7 +90,6 @@ The same look as on the Mac: Powerlevel10k "classic", two lines, slanted segment
 |---|---|
 | `mkcd dir` | create and enter |
 | `extract file` | unpack any archive |
-| `clip` / `clip -o` | copy from a pipe / paste (macOS and Wayland) |
 | `port 8080` / `ports` | what listens on a port / all listening ports |
 | `serve [port]` | serve the current directory over HTTP |
 | `json [file]` | pretty-print JSON (also from a pipe) |
@@ -104,11 +103,11 @@ The same look as on the Mac: Powerlevel10k "classic", two lines, slanted segment
 | `fix-history` | repair "zsh: corrupt history file" (keeps everything readable, saves the damaged copy) |
 
 **Git** (on top of oh-my-zsh's git aliases: `gst`, `gco`, `gp`, `gl`, `gcmsg`, …):
-`gbf` fuzzy branch switch, `glf` browse the log with diffs, `gbclean` delete merged branches, `gwip` / `gunwip`
+`gbf` fuzzy branch switch, `glf` browse the log with diffs, `gbclean` delete merged branches (squash-merged ones too, after asking), `gwip` / `gunwip`
 park work, `groot` cd to the repo root.
 
 **Docker:** `d`, `dc` (compose), `dcu` `dcd` `dcl`, `dps` (tidy table), `dex` (fuzzy-pick a container and get a
-shell), `dlog` (follow logs), `dstop` (multi-select stop), `dprune`.
+shell), `dlog` (follow logs), `dstop` (multi-select stop), `dprune` (asks, keeps volumes), `dprune-all` (also unused volumes, asks).
 
 **Kubernetes:** `k` (with completion), `kg` `kd` `kgp` `kgpa` `kgs` `kgd` `kgn` `kge` `kaf` `kdf` `ktop`;
 `kx` switch context and `kn` switch namespace (fuzzy); `kl` follow pod logs, `kex` shell into a pod,
@@ -171,7 +170,8 @@ global gitleaks hook, so add gitleaks to its `.pre-commit-config.yaml`).
 | `make secrets FILE=…` | move credentials from any old file into the secrets file |
 | `make chsh` | zsh as login shell |
 | `make update` | update zinit and plugins, rebuild caches |
-| `make check` | syntax-check everything and fail if startup prints anything |
+| `make lint` | syntax-check everything (what CI runs on every PR) |
+| `make check` | `lint`, then fail if interactive startup prints anything |
 | `make bench` | time 10 startups |
 | `make clean` | drop generated caches (rebuilt automatically) |
 

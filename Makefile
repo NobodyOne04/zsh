@@ -9,7 +9,7 @@ CACHE   := $(or $(XDG_CACHE_HOME),$(HOME)/.cache)/zsh
 SECRETS := $(or $(XDG_CONFIG_HOME),$(HOME)/.config)/zsh/secrets.zsh
 AGE_KEY := $(or $(XDG_CONFIG_HOME),$(HOME)/.config)/sops/age/keys.txt
 
-.PHONY: help install deps devops link unlink status age-key secrets chsh update check bench clean
+.PHONY: help install deps devops link unlink status age-key secrets chsh update lint check bench clean
 
 help: ## Show this help
 	@awk 'BEGIN {FS = ":.*##"} /^[a-zA-Z_-]+:.*##/ {printf "  \033[36m%-8s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -47,9 +47,11 @@ update: ## Update zinit and all plugins, then rebuild caches
 	zsh -i -c 'zinit self-update && zinit update --all --parallel --quiet'
 	@$(MAKE) --no-print-directory clean
 
-check: ## Syntax-check every file and make sure startup prints nothing
+lint: ## Syntax-check every file (what CI runs)
 	@for f in zshrc p10k.zsh conf.d/*.zsh lib/*.zsh; do zsh -n "$$f" || exit 1; done; echo "ok: syntax"
 	@bash -n scripts/link.sh && bash -n direnv/direnvrc && sh -n git/hooks/_dispatch && git config -f git/config --list >/dev/null && echo "ok: git, direnv, hooks"
+
+check: lint ## lint, then make sure interactive startup prints nothing
 	@log=$$(mktemp); \
 	if [ "$$(uname)" = Darwin ]; then script -q "$$log" zsh -i -c 'print -r -- CHECK_DONE' >/dev/null 2>&1; \
 	else script -qec "zsh -i -c 'print -r -- CHECK_DONE'" "$$log" >/dev/null 2>&1; fi; \

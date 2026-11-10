@@ -20,12 +20,6 @@ extract() {
   esac
 }
 
-# clipboard that works on macOS and Wayland: `cmd | clip`, `clip -o`
-clip() {
-  if (( IS_MAC )); then [[ $1 == -o ]] && pbpaste || pbcopy
-  else [[ $1 == -o ]] && wl-paste || wl-copy; fi
-}
-
 # port <n>: who is listening on a port; ports: everything listening
 port()  { lsof -nP -iTCP:"$1" -sTCP:LISTEN }
 ports() { lsof -nP -iTCP -sTCP:LISTEN | awk 'NR==1 || !seen[$1 $9]++' }

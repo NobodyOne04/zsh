@@ -25,6 +25,17 @@ _cached_completion() {
 
 _cached_source zoxide  zoxide init zsh                 # z <dir>, zi (interactive)
 _cached_source fzf     fzf --zsh                       # Ctrl-T files, Ctrl-R history, Alt-C cd
+# atuin's init runs `atuin uuid` (a process, ~10 ms) unless a session id is set: make the
+# same UUIDv7 (ms timestamp, version 7, random) here instead.
+# shortcut: $RANDOM, not crypto-grade; fine for a session id. Drop this if atuin changes the format.
+if (( $+commands[atuin] )) && [[ -z $ATUIN_SESSION || $ATUIN_SHLVL != $SHLVL ]]; then
+  zmodload zsh/datetime
+  typeset -i _ms=$(( EPOCHREALTIME * 1000 ))
+  printf -v ATUIN_SESSION '%012x7%03x%x%03x%04x%04x%04x' $_ms $(( RANDOM & 0xfff )) \
+    $(( 8 + (RANDOM & 3) )) $(( RANDOM & 0xfff )) $RANDOM $RANDOM $RANDOM
+  export ATUIN_SESSION ATUIN_SHLVL=$SHLVL
+  unset _ms
+fi
 _cached_source atuin   atuin init zsh --disable-up-arrow  # Ctrl-R: atuin history search (after fzf, so it wins)
 _cached_source direnv  direnv hook zsh                 # per-project .envrc
 _cached_source mise    mise activate zsh               # runtime versions (if you use mise)
