@@ -29,10 +29,16 @@ function gbclean {
   local main=$(git_main_branch)
   git fetch -p -q
   git branch --merged "$main" | grep -vE "^\*|^\s*(main|master|develop)\s*$" | xargs -r git branch -d
+  # squash-merged PRs aren't "merged" to git, but GitHub deleted their remote branch ([gone]);
+  # force-deleting loses unpushed work, so ask first
+  local -a gone=(${(f)"$(git branch --format='%(refname:short) %(upstream:track)' | awk '$2 == "[gone]" {print $1}')"})
+  (( $#gone )) || return 0
+  print -l "remote branch deleted (squash-merged?):" "  "${^gone}
+  if read -q "?force-delete these $#gone local branches? [y/N] "; then echo; git branch -D $gone; else echo; fi
 }
 
-# gwip / gunwip: park and restore unfinished work
-alias gwip='git add -A && git commit -qm "WIP [skip ci]" --no-verify && echo parked'
+# gwip / gunwip: park and restore unfinished work (gitleaks still scans it)
+alias gwip='git add -A && git commit -qm "WIP [skip ci]" && echo parked'
 alias gunwip='git log -1 --format=%s | grep -q "^WIP" && git reset -q HEAD~1 && echo restored'
 
 # groot: cd to the repository root

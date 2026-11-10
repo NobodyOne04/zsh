@@ -1,0 +1,15 @@
+name: check
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - run: sudo apt-get update -qq && sudo apt-get install -y -qq zsh
+      # syntax only: the silent-startup half of `make check` needs plugins and a terminal
+      - run: make lint

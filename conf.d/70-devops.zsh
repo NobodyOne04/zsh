@@ -7,7 +7,8 @@ if (( $+commands[docker] )); then
   alias dc='docker compose'
   alias dcu='docker compose up -d' dcd='docker compose down' dcl='docker compose logs -f --tail=100'
   alias dps='docker ps --format "table {{.Names}}\t{{.Image}}\t{{.Status}}\t{{.Ports}}"'
-  alias dprune='docker system prune -f --volumes'
+  alias dprune='docker system prune'                  # asks first; keeps volumes (database data)
+  alias dprune-all='docker system prune --volumes'    # also every unused volume; asks first
 
   _dpick() { docker ps ${1:+$1} --format '{{.Names}}\t{{.Image}}\t{{.Status}}' | fzf --with-nth=1.. --delimiter='\t' | cut -f1 }
   # dex: shell into a running container (picked with fzf)
