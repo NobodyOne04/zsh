@@ -3,22 +3,33 @@
 - Status: Accepted
 - Date: 2026-11-11
 
-## Context
-Projects need their own variables and Python virtualenvs, and some variables are secrets that
-should still be shareable through git.
+Every project gets its variables, encrypted secrets and Python virtualenv from one shared
+direnv layout, and a one-line `.envrc`.
 
-## Decision
-`direnv/direnvrc` defines `layout project`: loads `.env` (git-ignored everywhere), `.env.sops`
-(decrypted in memory with sops + age), and activates `.venv`/`venv`. A project's `.envrc` is that
-one line (`envinit` writes it).
+## Technical details
+- **Problem**: projects need their own variables and virtualenvs, and some variables are
+  secrets that should still be shareable through git.
+- **`layout project`** (`direnv/direnvrc`, linked to `~/.config/direnv/direnvrc`):
+  - `dotenv_if_exists .env`: plain variables; `.env`, `.env.local` and `.envrc` are
+    git-ignored globally (`git/ignore`), `.env.sops` is committed;
+  - `dotenv_sops .env.sops` if present;
+  - activates the first of `.venv` / `venv` with an executable `bin/python`: sets
+    `VIRTUAL_ENV` and `PATH_add <venv>/bin`.
+- **`dotenv_sops [file]`**: `watch_file`s it, needs `sops`, runs
+  `sops decrypt --input-type dotenv --output-type dotenv` and loads the result through
+  `direnv dotenv bash /dev/stdin`; plain text never touches disk. Errors are logged, not fatal.
+- **Keys**: `SOPS_AGE_KEY_FILE=$XDG_CONFIG_HOME/sops/age/keys.txt` on both OSes
+  (`conf.d/00-env.zsh`). `make age-key` creates it with `age-keygen` (mode 600), prints the
+  public key and says to back it up.
+- **Helpers** (`conf.d/60-functions.zsh`): `envinit` writes `layout project` to `.envrc` and
+  runs `direnv allow`; `env-encrypt [file]` encrypts `.env` into `.env.sops` for your age
+  public key; `env-edit` opens `.env.sops` with `sops edit`.
+- **Hook**: direnv's shell hook is cached by `_cached_source`
+  ([0003](0003-startup-budget-cached-inits.adr)).
+- **Consequences**: same setup in every project; encrypted secrets can live in git. Each
+  person needs a backed-up age key: without it `.env.sops` can't be read.
 
-## Alternatives
-- Per-project `.envrc` logic: copied and drifting between projects.
-- Plain `.env` only: secrets can't be committed or shared.
-
-## Consequences
-- Same setup in every project; encrypted secrets can live in git.
-- Needs an age key per person (`make age-key`), backed up: without it `.env.sops` can't be read.
-
-## References
-`direnv/direnvrc`, `Makefile` (`age-key`).
+## Technologies and alternatives
+- Involved: direnv, sops, age.
+- Alternatives: per-project `.envrc` logic: copied and drifting; plain `.env` only: secrets
+  can't be committed or shared.

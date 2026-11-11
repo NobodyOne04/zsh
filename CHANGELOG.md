@@ -14,6 +14,7 @@
 - `gbclean` also offers to delete branches that were squash-merged on GitHub
 
 ### Changed
+- ADRs rewritten in the new template (purpose, technical details, technologies and alternatives), with the implementation details
 - atuin's session id is made in zsh instead of running `atuin uuid` on every start (~10 ms faster)
 
 ### Removed
