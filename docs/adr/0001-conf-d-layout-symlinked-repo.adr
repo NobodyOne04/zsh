@@ -1,0 +1,26 @@
+# 0001. One repo, symlinked into ~, split into numbered conf.d files
+
+- Status: Accepted
+- Date: 2026-11-11
+
+## Context
+The old single `~/.zshrc` grew by hand on two machines (a Mac and an Arch desktop), appended PATH
+lines to itself and held credentials. Changes on one machine never reached the other.
+
+## Decision
+The config lives in this git repo. `scripts/link.sh` (`make link`) symlinks `zshrc` and the
+git/direnv/atuin/lazygit/eza configs into `~`, backing up what was there. `zshrc` only sources
+`conf.d/*.zsh` in name order; each file has one job (env, options, plugins, completion, tools,
+aliases, functions, devops, local).
+
+## Alternatives
+- One big `.zshrc`: hard to find things, merge conflicts between machines.
+- A dotfiles manager (chezmoi, stow, yadm): another tool to install for what a 60-line script does.
+
+## Consequences
+- `git pull` + `reload` syncs both machines; history and review come for free.
+- Load order is the file-name order, so the numbering is part of the contract.
+- Editing `~/.zshrc` edits the repo; `.bak-*` files are not the config.
+
+## References
+`zshrc`, `scripts/link.sh`, `CLAUDE.md` (map).
