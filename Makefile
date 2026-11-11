@@ -22,7 +22,7 @@ deps: ## Install shell tools (fzf, zoxide, eza, fd, rg, bat, direnv, lazygit, de
 devops: ## Install devops tools too (kubectl, helm, k9s, terraform, aws, docker, yq)
 	@./scripts/install-deps.sh --devops
 
-link: ## Link ~/.zshrc, git, direnv, atuin, lazygit configs (old files backed up)
+link: ## Link ~/.zshrc, git, direnv, atuin, lazygit, eza configs (old files backed up)
 	@./scripts/link.sh link
 
 unlink: ## Remove the links and restore the newest backups

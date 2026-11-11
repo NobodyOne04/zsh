@@ -3,6 +3,7 @@
 ## Unreleased
 
 ### Added
+- eza theme: ADR files (`.adr`) get a green gavel icon, as in nvim
 - CI runs `make lint` (syntax of every file) on every PR
 - `CLAUDE.md`: how to work on this repo with Claude Code
 

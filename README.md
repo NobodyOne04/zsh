@@ -47,6 +47,7 @@ git/hooks/               -> ~/.config/git/hooks    global hooks: gitleaks, then 
 direnv/direnvrc          -> ~/.config/direnv/direnvrc   `layout project`, `dotenv_sops`
 atuin/config.toml        -> ~/.config/atuin/config.toml
 lazygit/config.yml       -> ~/.config/lazygit/config.yml
+eza/theme.yml            -> ~/.config/eza/theme.yml   (ADR files: green gavel icon)
 scripts/link.sh          creates / removes / checks all the links above
 ```
 
