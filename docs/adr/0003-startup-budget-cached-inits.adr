@@ -1,0 +1,31 @@
+# 0003. Startup is silent and fast: no process per shell, tool inits cached
+
+- Status: Accepted
+- Date: 2026-11-11
+
+## Context
+`eval "$(tool init zsh)"` and generated completions start a process on every shell, and
+compinit re-scans fpath every time. Any output before the prompt breaks p10k's instant prompt.
+
+## Decision
+- Budget ~50 ms to a usable prompt, measured with `make bench`; `make check` fails on any output.
+- `_cached_source` writes a tool's init to `~/.cache/zsh/<tool>.zsh` (zcompiled) and regenerates it
+  only when the tool's binary is newer; `_cached_completion` does the same for completions, in the
+  background.
+- `compinit` does a full check once a day, otherwise trusts its dump (`compinit -C`).
+- Process-free replacements where a tool's init would spawn one (atuin's session id is a UUIDv7
+  made in zsh).
+- No network at startup.
+
+## Alternatives
+- Plain `eval "$(tool init zsh)"`: simplest, ~10 ms per tool per shell.
+- evalcache-style plugins: another dependency for a 10-line function.
+
+## Consequences
+- Fast, quiet startup with p10k instant prompt.
+- Stale caches: after changing how a tool is initialised, `make clean`; new completions show up
+  the next day or after `make clean`; the first shell after installing a tool lacks its completion.
+- The atuin UUID block must follow atuin's format if it changes.
+
+## References
+`conf.d/30-completion.zsh`, `conf.d/40-tools.zsh`, `Makefile`, CLAUDE.md gotchas 2, 3, 5.

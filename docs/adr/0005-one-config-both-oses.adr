@@ -1,0 +1,23 @@
+# 0005. One config for macOS and Arch, guarded per OS and per tool
+
+- Status: Accepted
+- Date: 2026-11-11
+
+## Context
+The same shell runs on a Mac (BSD userland) and an Arch desktop (GNU, Wayland or X11), and not
+every tool is installed on both.
+
+## Decision
+No per-OS branches or files. Differences are handled inline: `(( IS_MAC ))` / `$OSTYPE`, then
+`$WAYLAND_DISPLAY`, then X11. Every alias and helper is guarded on its tool
+(`(( $+commands[x] ))`) and works when it is missing. Commands use flags both BSD and GNU accept.
+
+## Alternatives
+- Separate mac/linux files or branches: drift between them, every change made twice.
+
+## Consequences
+- One place to change; a fresh machine with few tools still starts cleanly.
+- Every helper needs a guard, and BSD/GNU differences (`sed -i.bak`) need care.
+
+## References
+`conf.d/00-env.zsh`, `conf.d/50-aliases.zsh`, CLAUDE.md rules.

@@ -1,0 +1,26 @@
+# 0002. zinit as the only plugin manager, non-prompt plugins load turbo
+
+- Status: Accepted
+- Date: 2026-11-11
+
+## Context
+oh-my-zsh plus plugins loaded everything before the first prompt; startup was ~15x slower than now.
+Only a few oh-my-zsh pieces were used (its git library and git plugin aliases).
+
+## Decision
+zinit is the only plugin manager. Powerlevel10k and zsh-completions load immediately; autosuggestions,
+history-substring-search, fast-syntax-highlighting and oh-my-zsh's git plugin (as `OMZL::`/`OMZP::`
+snippets) load `wait` ("turbo"), right after the prompt. `lib/git.zsh` loads after the git plugin.
+
+## Alternatives
+- Full oh-my-zsh: slow, loads far more than used.
+- antidote / sheldon / plain `source`: no deferred loading with the same control.
+
+## Consequences
+- Prompt appears before most plugins are loaded.
+- `zsh -ic` never reaches turbo plugins: tests need `@zinit-scheduler burst` first.
+- oh-my-zsh's hundreds of git aliases can clash with helper names: helpers use `function name {`
+  and `unalias`.
+
+## References
+`conf.d/20-plugins.zsh`, CLAUDE.md gotcha 1, [0003](0003-startup-budget-cached-inits.adr).

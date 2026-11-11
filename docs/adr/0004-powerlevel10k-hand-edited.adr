@@ -1,0 +1,23 @@
+# 0004. Powerlevel10k prompt with instant prompt, `p10k.zsh` edited by hand
+
+- Status: Accepted
+- Date: 2026-11-11
+
+## Context
+The prompt must draw instantly and show an OS logo and colours matching the archminimal theme.
+
+## Decision
+Powerlevel10k, loaded by zinit, with instant prompt sourced at the top of `zshrc`. `p10k.zsh` is
+kept in the repo and edited by hand; `p10k configure` is never run.
+
+## Alternatives
+- starship: one more binary, a process per prompt, no instant prompt.
+- pure / a hand-written prompt: less information, slower git status.
+
+## Consequences
+- Perceived startup near zero.
+- Nothing may print or prompt for input during startup (see [0003](0003-startup-budget-cached-inits.adr)).
+- `p10k configure` would overwrite the custom logo and colours.
+
+## References
+`zshrc`, `p10k.zsh`, `conf.d/20-plugins.zsh`.

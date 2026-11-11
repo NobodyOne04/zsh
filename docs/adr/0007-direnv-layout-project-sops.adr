@@ -1,0 +1,24 @@
+# 0007. Per-project env via direnv `layout project`, secrets in sops-encrypted .env
+
+- Status: Accepted
+- Date: 2026-11-11
+
+## Context
+Projects need their own variables and Python virtualenvs, and some variables are secrets that
+should still be shareable through git.
+
+## Decision
+`direnv/direnvrc` defines `layout project`: loads `.env` (git-ignored everywhere), `.env.sops`
+(decrypted in memory with sops + age), and activates `.venv`/`venv`. A project's `.envrc` is that
+one line (`envinit` writes it).
+
+## Alternatives
+- Per-project `.envrc` logic: copied and drifting between projects.
+- Plain `.env` only: secrets can't be committed or shared.
+
+## Consequences
+- Same setup in every project; encrypted secrets can live in git.
+- Needs an age key per person (`make age-key`), backed up: without it `.env.sops` can't be read.
+
+## References
+`direnv/direnvrc`, `Makefile` (`age-key`).

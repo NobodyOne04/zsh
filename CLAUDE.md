@@ -20,6 +20,7 @@ with it. `~/.zshrc` is a symlink to `zshrc` here; edit this repo, never the link
 | prompt | `p10k.zsh`: edit by hand, never `p10k configure` (custom OS logo + colours) |
 | git defaults, global ignore, global hooks | `git/config`, `git/ignore`, `git/hooks/_dispatch` (every hook is a symlink to it) |
 | per-project env | `direnv/direnvrc` (`layout project`) |
+| architectural decision (why it's built this way) | `docs/adr/NNNN-title.adr` + `docs/adr/README.md` index |
 | new file to link into `~` | `scripts/link.sh` `links=(…)`, then tell me to run `make link` |
 
 `zshrc` only sources `conf.d/*.zsh` in name order; `90-local` sources the untracked
