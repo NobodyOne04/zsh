@@ -1,6 +1,6 @@
 # CLAUDE.md: zsh config
 
-My shell config for a Mac and an Arch desktop, plus the git/direnv/atuin/lazygit configs that ship
+My shell config for a Mac and an Arch desktop, plus the git/direnv/atuin/lazygit/eza configs that ship
 with it. `~/.zshrc` is a symlink to `zshrc` here; edit this repo, never the link target or a `.bak-*`.
 `README.md` is for me (keys, aliases, helpers); this file is for you.
 

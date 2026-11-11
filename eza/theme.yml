@@ -1,0 +1,6 @@
+# eza look. Only overrides; everything else keeps eza's defaults.
+# ADR files (docs/adr/NNNN-title.adr): a gavel in tokyonight green, same as in nvim
+extensions:
+  adr:
+    filename: { foreground: "#c3e88d" }
+    icon: { glyph: "󰊛", style: { foreground: "#c3e88d" } }

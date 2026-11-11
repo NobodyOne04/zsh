@@ -49,6 +49,8 @@ export FZF_DEFAULT_OPTS="--height=40% --layout=reverse --border=rounded --info=i
 export FZF_CTRL_T_OPTS="--preview 'bat --color=always --style=numbers --line-range=:200 {} 2>/dev/null || cat {}'"
 export FZF_ALT_C_OPTS="--preview 'eza --tree --level=2 --color=always --icons=auto {}'"
 
+# eza's theme (eza/theme.yml, linked here); macOS would look in ~/Library/Application Support
+export EZA_CONFIG_DIR=$XDG_CONFIG_HOME/eza
 export BAT_THEME=${BAT_THEME:-ansi}
 export MANPAGER="sh -c 'col -bx | bat -l man -p'"   # colored man pages (when bat exists)
 (( $+commands[bat] )) || unset MANPAGER

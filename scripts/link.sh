@@ -17,6 +17,7 @@ links=(
   "direnv/direnvrc         $cfg/direnv/direnvrc"
   "atuin/config.toml       $cfg/atuin/config.toml"
   "lazygit/config.yml      $cfg/lazygit/config.yml"
+  "eza/theme.yml           $cfg/eza/theme.yml"
 )
 
 do_link() {
