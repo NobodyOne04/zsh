@@ -3,21 +3,30 @@
 - Status: Accepted
 - Date: 2026-11-11
 
-## Context
-The prompt must draw instantly and show an OS logo and colours matching the archminimal theme.
+The prompt is Powerlevel10k with instant prompt, its config kept in the repo and edited by
+hand so the archminimal look survives.
 
-## Decision
-Powerlevel10k, loaded by zinit, with instant prompt sourced at the top of `zshrc`. `p10k.zsh` is
-kept in the repo and edited by hand; `p10k configure` is never run.
+## Technical details
+- **Problem**: the prompt must draw instantly and look the same on both machines, with an OS
+  logo and colours matching the archminimal desktop theme.
+- **Instant prompt**: the first block of `zshrc` sources
+  `$XDG_CACHE_HOME/p10k-instant-prompt-$USER.zsh`, so the prompt draws while the rest loads.
+  Anything that prints or reads input must come before it, or not at all
+  ([0003](0003-startup-budget-cached-inits.adr)).
+- **Loading**: zinit loads `romkatv/powerlevel10k` immediately (not turbo), then sources
+  `$ZSH_CONFIG_DIR/p10k.zsh`.
+- **`p10k.zsh`**: started from the wizard (classic style, nerdfont-v3, 2 lines, slanted
+  heads/tails, right frame, transient prompt, `instant_prompt=verbose`); every manual change
+  is marked `archminimal`. The first left segment is `os_icon`: Apple on macOS, the Arch
+  logo in the desktop cyan `#00e5ff` on Linux (`[[ $OSTYPE == linux* ]]`). The
+  `kubecontext` segment also shows while typing the k8s aliases from `conf.d/70-devops.zsh`
+  (`k`, `kgp`, `kx`, ...), not only `kubectl`/`helm`.
+- **Rule**: never run `p10k configure`; it rewrites the file and drops the custom logo and
+  colours.
+- **Consequences**: perceived startup near zero; nothing may print during startup; every
+  look change is a hand edit.
 
-## Alternatives
-- starship: one more binary, a process per prompt, no instant prompt.
-- pure / a hand-written prompt: less information, slower git status.
-
-## Consequences
-- Perceived startup near zero.
-- Nothing may print or prompt for input during startup (see [0003](0003-startup-budget-cached-inits.adr)).
-- `p10k configure` would overwrite the custom logo and colours.
-
-## References
-`zshrc`, `p10k.zsh`, `conf.d/20-plugins.zsh`.
+## Technologies and alternatives
+- Involved: powerlevel10k, a Nerd Font (v3).
+- Alternatives: starship: one more binary, a process per prompt, no instant prompt; pure or a
+  hand-written prompt: less information, slower git status.

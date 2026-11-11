@@ -3,29 +3,38 @@
 - Status: Accepted
 - Date: 2026-11-11
 
-## Context
-`eval "$(tool init zsh)"` and generated completions start a process on every shell, and
-compinit re-scans fpath every time. Any output before the prompt breaks p10k's instant prompt.
+A new shell reaches a usable prompt in ~50 ms, prints nothing and starts no process that
+could be cached.
 
-## Decision
-- Budget ~50 ms to a usable prompt, measured with `make bench`; `make check` fails on any output.
-- `_cached_source` writes a tool's init to `~/.cache/zsh/<tool>.zsh` (zcompiled) and regenerates it
-  only when the tool's binary is newer; `_cached_completion` does the same for completions, in the
-  background.
-- `compinit` does a full check once a day, otherwise trusts its dump (`compinit -C`).
-- Process-free replacements where a tool's init would spawn one (atuin's session id is a UUIDv7
-  made in zsh).
-- No network at startup.
+## Technical details
+- **Problem**: `eval "$(tool init zsh)"` and generated completions start a process on every
+  shell (~10 ms each), compinit re-scans fpath every time, and any output before the prompt
+  breaks p10k's instant prompt.
+- **Budget**: ~50 ms to a usable prompt (now ~60 ms), measured with `make bench` (10
+  interactive startups via `$EPOCHREALTIME`). `make check` runs `zsh -i` under `script` and
+  fails if startup prints anything; it can flake once without a real terminal.
+- **`_cached_source <name> <cmd...>`** (`conf.d/40-tools.zsh`): skips if the tool is missing;
+  writes the init to `$ZSH_CACHE_DIR/<name>.zsh`, `zcompile`s it, and regenerates only when
+  the tool's binary is newer than the cache (`$commands[x] -nt $cache`). Used for zoxide,
+  fzf (`fzf --zsh`), atuin (`--disable-up-arrow`, after fzf so its Ctrl-R wins), direnv and
+  mise.
+- **`_cached_completion <cmd> <cmd...>`**: writes `_<cmd>` into
+  `$ZSH_CACHE_DIR/completions` (first in fpath) in the background (`&!`, via a `.tmp` file
+  then `mv`). Used for kubectl, helm, gh, uv, k9s, kind; terraform uses `bashcompinit` +
+  `complete -C`.
+- **compinit** (`conf.d/30-completion.zsh`): full `compinit -i` and a background `zcompile`
+  only when the dump is missing or older than 24 h (`(#qN.mh+24)`), otherwise `compinit -C`.
+- **No process where a value can be computed**: `GOPATH` defaults to `~/go` instead of
+  `$(go env GOPATH)`; atuin's session id is a UUIDv7 built in zsh from `$EPOCHREALTIME` and
+  `$RANDOM` (`printf -v ATUIN_SESSION ...`) instead of `atuin uuid`, regenerated per `SHLVL`.
+- **PATH**: `typeset -gU path fpath` keeps entries unique; `(N-/)` drops missing dirs.
+- **No network at startup** (except the one-time zinit clone).
+- **Consequences**: fast, quiet startup with instant prompt. Stale caches: after changing how
+  a tool is initialised, `make clean`; new completions appear the next day or after
+  `make clean`; the first shell after installing a tool lacks its completion. The atuin
+  block must follow atuin's UUID format if it changes.
 
-## Alternatives
-- Plain `eval "$(tool init zsh)"`: simplest, ~10 ms per tool per shell.
-- evalcache-style plugins: another dependency for a 10-line function.
-
-## Consequences
-- Fast, quiet startup with p10k instant prompt.
-- Stale caches: after changing how a tool is initialised, `make clean`; new completions show up
-  the next day or after `make clean`; the first shell after installing a tool lacks its completion.
-- The atuin UUID block must follow atuin's format if it changes.
-
-## References
-`conf.d/30-completion.zsh`, `conf.d/40-tools.zsh`, `Makefile`, CLAUDE.md gotchas 2, 3, 5.
+## Technologies and alternatives
+- Involved: zsh `zcompile`, `zsh/datetime`, compinit; zoxide, fzf, atuin, direnv, mise.
+- Alternatives: plain `eval "$(tool init zsh)"`: ~10 ms per tool per shell;
+  evalcache-style plugins: a dependency for a 10-line function.

@@ -3,21 +3,27 @@
 - Status: Accepted
 - Date: 2026-11-11
 
-## Context
-The same shell runs on a Mac (BSD userland) and an Arch desktop (GNU, Wayland or X11), and not
-every tool is installed on both.
+The same files run on the Mac and on Arch; differences are handled inline, and every helper
+works when its tool is missing.
 
-## Decision
-No per-OS branches or files. Differences are handled inline: `(( IS_MAC ))` / `$OSTYPE`, then
-`$WAYLAND_DISPLAY`, then X11. Every alias and helper is guarded on its tool
-(`(( $+commands[x] ))`) and works when it is missing. Commands use flags both BSD and GNU accept.
+## Technical details
+- **Problem**: the same shell runs on a Mac (BSD userland, Homebrew) and an Arch desktop (GNU,
+  Wayland or X11), and not every tool is installed on both.
+- **OS detection**: `conf.d/00-env.zsh` sets `IS_MAC` / `IS_LINUX` from `$OSTYPE` once. On
+  macOS it adds `/opt/homebrew/{bin,sbin}`, keg-only `libpq` (with `LDFLAGS`/`CPPFLAGS` for
+  psycopg builds) and Homebrew's `site-functions` to fpath.
+- **Order of checks**: `(( IS_MAC ))` / `[[ $OSTYPE == darwin* ]]`, then `$WAYLAND_DISPLAY`,
+  then X11. Example, the clipboard aliases: `cbc`/`cbp` are `pbcopy`/`pbpaste`, else
+  `wl-copy`/`wl-paste`, else `xclip -selection clipboard`.
+- **Tool guards**: every alias and helper is wrapped in `(( $+commands[x] ))`; the cache
+  helpers return early when the tool is missing, so a fresh machine with few tools still
+  starts cleanly and silently.
+- **Portable flags**: BSD and GNU differ (`sed -i.bak` then `rm`, not `sed -i`; `script`
+  syntax in `make check` is chosen by `uname`). Flags are checked on both before use.
+- **Packages**: `scripts/install-deps.sh` installs the same tool set with brew or pacman;
+  `--devops` adds kubectl, helm, k9s, terraform, aws, docker, yq.
+- **Consequences**: one place to change; every helper needs a guard and BSD/GNU care.
 
-## Alternatives
-- Separate mac/linux files or branches: drift between them, every change made twice.
-
-## Consequences
-- One place to change; a fresh machine with few tools still starts cleanly.
-- Every helper needs a guard, and BSD/GNU differences (`sed -i.bak`) need care.
-
-## References
-`conf.d/00-env.zsh`, `conf.d/50-aliases.zsh`, CLAUDE.md rules.
+## Technologies and alternatives
+- Involved: Homebrew (macOS), pacman (Arch), wl-clipboard / xclip.
+- Alternatives: separate mac/linux files or branches: drift, every change made twice.

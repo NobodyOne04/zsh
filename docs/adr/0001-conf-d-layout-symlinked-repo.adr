@@ -3,24 +3,39 @@
 - Status: Accepted
 - Date: 2026-11-11
 
-## Context
-The old single `~/.zshrc` grew by hand on two machines (a Mac and an Arch desktop), appended PATH
-lines to itself and held credentials. Changes on one machine never reached the other.
+The shell config lives in this git repo, is linked into `~` by a script, and is split into
+one-job files loaded in name order.
 
-## Decision
-The config lives in this git repo. `scripts/link.sh` (`make link`) symlinks `zshrc` and the
-git/direnv/atuin/lazygit/eza configs into `~`, backing up what was there. `zshrc` only sources
-`conf.d/*.zsh` in name order; each file has one job (env, options, plugins, completion, tools,
-aliases, functions, devops, local).
+## Technical details
+- **Problem**: the old single `~/.zshrc` grew by hand on two machines (a Mac and an Arch
+  desktop), appended PATH lines to itself (3,249 PATH entries, 21 unique) and held
+  credentials. Changes on one machine never reached the other.
+- **Entry point**: `~/.zshrc` is a symlink to `zshrc`. It sources p10k's instant prompt first,
+  finds the repo through the symlink (`ZSH_CONFIG_DIR=${${(%):-%x}:A:h}`), then sources
+  `conf.d/*.zsh(N)` in name order and nothing else.
+- **conf.d, one job per file**:
+  - `00-env.zsh`: XDG dirs, `ZSH_CACHE_DIR`, `EDITOR`, `IS_MAC`/`IS_LINUX`, PATH and fzf look;
+    spawns no processes.
+  - `10-options.zsh`: setopt, history, key bindings.
+  - `20-plugins.zsh`: zinit and plugins ([0002](0002-zinit-turbo-plugins.adr)).
+  - `30-completion.zsh`: compinit, zstyles, fzf-tab.
+  - `40-tools.zsh`: cached tool inits and completions ([0003](0003-startup-budget-cached-inits.adr)).
+  - `50-aliases.zsh`, `60-functions.zsh`, `70-devops.zsh` (docker, k8s, terraform, aws).
+  - `90-local.zsh`: untracked machine settings and secrets, last ([0006](0006-secrets-out-of-repo-gitleaks.adr)).
+  - `lib/git.zsh`: git helpers, loaded after oh-my-zsh's git plugin.
+- **Linking**: `scripts/link.sh link|unlink|status` (`make link`, `make unlink`,
+  `make status`) links `zshrc`, `git/config`, `git/ignore`, `git/hooks`, `direnv/direnvrc`,
+  `atuin/config.toml`, `lazygit/config.yml` and `eza/theme.yml` into `~` / `$XDG_CONFIG_HOME`.
+  An existing file is moved to `<file>.bak-<YYYYmmdd-HHMMSS>`; replacing an old `~/.zshrc` also
+  runs `migrate-secrets.sh` on the backup. `unlink` restores the newest backup. A new file to
+  link is one line in the `links=(...)` array.
+- **Install**: `make install` = `make deps` (`scripts/install-deps.sh`, brew or pacman) +
+  `make link`; `make chsh` makes zsh the login shell on Arch.
+- **Consequences**: `git pull` + `reload` syncs both machines; history and review come with
+  git. Load order is the file-name order, so the numbering is part of the contract. Editing
+  `~/.zshrc` edits the repo; `.bak-*` files are not the config.
 
-## Alternatives
-- One big `.zshrc`: hard to find things, merge conflicts between machines.
-- A dotfiles manager (chezmoi, stow, yadm): another tool to install for what a 60-line script does.
-
-## Consequences
-- `git pull` + `reload` syncs both machines; history and review come for free.
-- Load order is the file-name order, so the numbering is part of the contract.
-- Editing `~/.zshrc` edits the repo; `.bak-*` files are not the config.
-
-## References
-`zshrc`, `scripts/link.sh`, `CLAUDE.md` (map).
+## Technologies and alternatives
+- Involved: zsh, bash (`link.sh`), GNU Make, git.
+- Alternatives: one big `.zshrc`: hard to navigate, conflicts between machines; a dotfiles
+  manager (chezmoi, stow, yadm): another tool for what a 60-line script does.

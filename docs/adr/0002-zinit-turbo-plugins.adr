@@ -3,24 +3,34 @@
 - Status: Accepted
 - Date: 2026-11-11
 
-## Context
-oh-my-zsh plus plugins loaded everything before the first prompt; startup was ~15x slower than now.
-Only a few oh-my-zsh pieces were used (its git library and git plugin aliases).
+One plugin manager, zinit, and everything not needed to draw the prompt loads right after
+it appears.
 
-## Decision
-zinit is the only plugin manager. Powerlevel10k and zsh-completions load immediately; autosuggestions,
-history-substring-search, fast-syntax-highlighting and oh-my-zsh's git plugin (as `OMZL::`/`OMZP::`
-snippets) load `wait` ("turbo"), right after the prompt. `lib/git.zsh` loads after the git plugin.
+## Technical details
+- **Problem**: oh-my-zsh plus plugins loaded everything before the first prompt; startup was
+  ~15x slower than now, while only oh-my-zsh's git library and git plugin aliases were used.
+- **Bootstrap** (`conf.d/20-plugins.zsh`): `ZINIT[HOME_DIR]=$XDG_DATA_HOME/zinit`,
+  `ZINIT[ZCOMPDUMP_PATH]=$ZSH_CACHE_DIR/zcompdump`; if `zinit.zsh` is missing it is cloned
+  (`--depth=1`) from `zdharma-continuum/zinit`, the only network access, on first run only.
+- **Loaded now**: `romkatv/powerlevel10k` (`depth=1`) then `p10k.zsh`;
+  `zsh-users/zsh-completions` with `blockf` (adds to fpath before compinit). `Aloxaf/fzf-tab`
+  loads in `30-completion.zsh` after compinit.
+- **Loaded turbo** (`zinit wait lucid light-mode`):
+  - `zsh-users/zsh-autosuggestions` (`atload'_zsh_autosuggest_start'`, strategy
+    `history completion`, buffer max 40, colour `#4a4c54`);
+  - `zsh-users/zsh-history-substring-search`, bound to Up/Down and `^P`/`^N` in `atload`;
+  - `zdharma-continuum/fast-syntax-highlighting`;
+  - `OMZL::git.zsh` + `OMZP::git` snippets (oh-my-zsh's git library and aliases `gst`,
+    `gco`, ...), then `lib/git.zsh` via `atload`.
+- **Maintenance**: `make update` runs `zinit self-update && zinit update --all --parallel`,
+  then `make clean` to rebuild caches.
+- **Consequences**: the prompt appears before most plugins load. `zsh -ic` never reaches
+  turbo plugins, so tests run `@zinit-scheduler burst` first (CLAUDE.md gotcha 1).
+  oh-my-zsh's hundreds of git aliases can clash with helper names: an alias breaks
+  `name() {` at parse time, so helpers use `function name {` plus `unalias name 2>/dev/null`.
 
-## Alternatives
-- Full oh-my-zsh: slow, loads far more than used.
-- antidote / sheldon / plain `source`: no deferred loading with the same control.
-
-## Consequences
-- Prompt appears before most plugins are loaded.
-- `zsh -ic` never reaches turbo plugins: tests need `@zinit-scheduler burst` first.
-- oh-my-zsh's hundreds of git aliases can clash with helper names: helpers use `function name {`
-  and `unalias`.
-
-## References
-`conf.d/20-plugins.zsh`, CLAUDE.md gotcha 1, [0003](0003-startup-budget-cached-inits.adr).
+## Technologies and alternatives
+- Involved: zinit (zdharma-continuum), powerlevel10k, zsh-completions, zsh-autosuggestions,
+  zsh-history-substring-search, fast-syntax-highlighting, fzf-tab, oh-my-zsh snippets.
+- Alternatives: full oh-my-zsh: slow, loads far more than used; antidote / sheldon / plain
+  `source`: no deferred loading with the same control.
