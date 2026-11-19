@@ -12,6 +12,7 @@ it appears.
 - **Bootstrap** (`conf.d/20-plugins.zsh`): `ZINIT[HOME_DIR]=$XDG_DATA_HOME/zinit`,
   `ZINIT[ZCOMPDUMP_PATH]=$ZSH_CACHE_DIR/zcompdump`; if `zinit.zsh` is missing it is cloned
   (`--depth=1`) from `zdharma-continuum/zinit`, the only network access, on first run only.
+- **Plugin location** (2026-11-19): `ZINIT[HOME_DIR]` is now `$ARCHMINIMAL_PLUGINS/zinit` (`/opt/archminimal/plugins/zinit`, or `$XDG_DATA_HOME/zinit` on machines without `/opt/archminimal`), per archminimal-setup ADR-0010; `00-env.zsh` exports `ARCHMINIMAL_PLUGINS` for tmux and nvim too.
 - **Loaded now**: `romkatv/powerlevel10k` (`depth=1`) then `p10k.zsh`;
   `zsh-users/zsh-completions` with `blockf` (adds to fpath before compinit). `Aloxaf/fzf-tab`
   loads in `30-completion.zsh` after compinit.

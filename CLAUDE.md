@@ -75,4 +75,4 @@ zsh -ic '@zinit-scheduler burst >/dev/null 2>&1; whence -w gst gbclean'   # see 
 - After a merge: remind me to `git pull` here and on the other machine, then `reload`;
   `make link` only if `scripts/link.sh` gained a link.
 - Ask before `make install`, `make deps`, `make link`/`unlink`, `make chsh`, package installs, or
-  touching `~/.oh-my-zsh`, `~/.local/share/zinit`.
+  touching `~/.oh-my-zsh`, `$ARCHMINIMAL_PLUGINS/zinit` (`/opt/archminimal/plugins/zinit`).

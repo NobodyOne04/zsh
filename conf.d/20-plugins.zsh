@@ -3,9 +3,11 @@
 # "turbo": right after the prompt appears.
 
 typeset -gA ZINIT
-ZINIT[HOME_DIR]=$XDG_DATA_HOME/zinit
+ZINIT[HOME_DIR]=$ARCHMINIMAL_PLUGINS/zinit
 ZINIT[BIN_DIR]=$ZINIT[HOME_DIR]/zinit.git
 ZINIT[ZCOMPDUMP_PATH]=$ZSH_CACHE_DIR/zcompdump
+# zinit exports ZPFX; set it so a shell started from an older one doesn't inherit an old path
+export ZPFX=$ZINIT[HOME_DIR]/polaris
 if [[ ! -f $ZINIT[BIN_DIR]/zinit.zsh ]]; then
   print -P "%F{cyan}› installing zinit…%f"
   command git clone --depth=1 https://github.com/zdharma-continuum/zinit.git "$ZINIT[BIN_DIR]"

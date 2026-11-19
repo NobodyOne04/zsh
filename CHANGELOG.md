@@ -8,6 +8,9 @@
 - CI runs `make lint` (syntax of every file) on every PR
 - `CLAUDE.md`: how to work on this repo with Claude Code
 
+### Changed
+- zinit and its plugins live in `/opt/archminimal/plugins/zinit` (`$ARCHMINIMAL_PLUGINS`), outside home; machines without `/opt/archminimal` keep `~/.local/share/zinit`
+
 ### Fixed
 - `gwip` no longer skips the gitleaks secret scan
 - `dprune` asks before pruning and keeps volumes; `dprune-all` is the full wipe, also asking

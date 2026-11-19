@@ -4,6 +4,12 @@ export XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-$HOME/.config}
 export XDG_CACHE_HOME=${XDG_CACHE_HOME:-$HOME/.cache}
 export XDG_DATA_HOME=${XDG_DATA_HOME:-$HOME/.local/share}
 export XDG_STATE_HOME=${XDG_STATE_HOME:-$HOME/.local/state}
+# Plugins live outside home, next to the repos, so home can be wiped (archminimal-setup ADR-0010).
+# Machines without /opt/archminimal keep them in XDG_DATA_HOME. tmux and nvim read this too.
+if [[ -z $ARCHMINIMAL_PLUGINS ]]; then
+  [[ -d /opt/archminimal ]] && ARCHMINIMAL_PLUGINS=/opt/archminimal/plugins || ARCHMINIMAL_PLUGINS=$XDG_DATA_HOME
+fi
+export ARCHMINIMAL_PLUGINS
 typeset -g ZSH_CACHE_DIR=$XDG_CACHE_HOME/zsh
 [[ -d $ZSH_CACHE_DIR ]] || mkdir -p "$ZSH_CACHE_DIR/completions"
 
